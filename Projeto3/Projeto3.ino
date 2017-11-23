@@ -11,16 +11,8 @@
 const byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x11 }; // o ultimo 0xED foi trocado para 0x11
 // Set the static IP address to use if the DHCP fails to assign
 //IPAddress ip(192, 168, 3, 15);   // ip da placa de rede do arduino
-//IPAddress ipServer(192, 168, 3, 140); // ip do servidor que vai receber a temperatura
+//IPAddress ipServer(192, 168, 3, 141); // ip do servidor que vai receber a temperatura
 EthernetClient ethclient;
-
-RestClient client = RestClient("192.168.3.186", 3000, ethclient); // ip precisa mudar ?
-String sid = "AC36135c57a2e51019e7c00f107e9408b0";
-String token = "db587f4175c3b6360aebf4a11e8699c3";
-String to = "5511952021310"; // nao entendi
-String from = "17312014022"; // nao entendi
-String response = "";
-
 
 
 const int pinLedVermelho = 2;
@@ -50,24 +42,38 @@ byte colPins[COLS] = {8, 7, 6}; //connect to the column pinouts of the keypad
 
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
+RestClient client = RestClient("192.168.3.186", 3000, ethclient);
+const char* sid = "AC36135c57a2e51019e7c00f107e9408b0";
+const char*  token = "db587f4175c3b6360aebf4a11e8699c3";
+const char*  to = "5511952021310"; // nao entendi
+const char*  from = "17312014022"; // nao entendi
+
+String response = "";
+
+//Setup
 void setup() {
-  // Open serial communications and wait for port to open:
   Serial.begin(9600);
-  while (!Serial) {
-    // wait for serial port to connect. Needed for native USB port only
-  }
-/*
+  // Connect via DHCP
   if (Ethernet.begin(mac)) {
     Serial.println("Conectado via DHCP");
-    Serial.print("IP recebido:");
-    Serial.println(Ethernet.localIP());
+    Serial.print("IP recebido:"); Serial.println(Ethernet.localIP());
   }
 
-  String parametros = "sid=" + sid +
-                      "&token=" + token +
-                      "&to=" + to +
-                      "&from=" + from +
-                      "&body=Mesagem legal";   // + variavelMensagem;
+  String parametros = "sid=";
+  parametros.concat(sid);
+
+  parametros.concat("&token=");
+  parametros.concat(token);
+
+  parametros.concat("&to=");
+  parametros.concat(to);
+
+  parametros.concat("&from=");
+  parametros.concat(from);
+
+  parametros.concat("&body=Mensagem DO ALEMMMMM");
+
+  Serial.println(parametros);
 
   int statusCode = client.post("/sms", parametros.c_str(), &response);
   Serial.print("Status da resposta: ");
@@ -75,8 +81,7 @@ void setup() {
   Serial.print("Resposta do servidor: ");
   Serial.println(response);
   delay(1000);
-
-*/
+  // */
   pinMode(pinLedVermelho, OUTPUT);
   pinMode(pinLedVerde, OUTPUT);
   pinMode(A0, INPUT);
@@ -88,13 +93,13 @@ void setup() {
 
 void loop() {
   int leitura = analogRead(pinoSensorLuz);
-  if(leitura > 40 && !alarmeAtivado){
+  if (leitura > 40 && !alarmeAtivado) {
     tocarSirene();
     // enviarSMS caso o alarme esteja ativado;
-  } else{ 
+  } else {
     noTone(pinoBuzzer);
-    }
-  
+  }
+
   //Serial.println(leitura);
   delay(100);
 
