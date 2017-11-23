@@ -56,7 +56,7 @@ void setup() {
   while (!Serial) {
     // wait for serial port to connect. Needed for native USB port only
   }
-
+/*
   if (Ethernet.begin(mac)) {
     Serial.println("Conectado via DHCP");
     Serial.print("IP recebido:");
@@ -76,7 +76,7 @@ void setup() {
   Serial.println(response);
   delay(1000);
 
-
+*/
   pinMode(pinLedVermelho, OUTPUT);
   pinMode(pinLedVerde, OUTPUT);
   pinMode(A0, INPUT);
