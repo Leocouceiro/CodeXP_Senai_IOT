@@ -40,6 +40,12 @@ const char* parametros = "sid=AC36135c57a2e51019e7c00f107e9408b0&token=db587f417
 
 String response = "";
 
+bool autorizado;
+int entradaSaida;
+int entrada;
+int saida;
+int tentativa;
+
 //Setup
 void setup() {
   Serial.begin(9600);
@@ -54,56 +60,65 @@ void setup() {
   Serial.println(statusCode);
   Serial.print("Resposta do servidor: ");
   Serial.println(response);
-   delay(1000);
+  delay(1000);
   // */
-  
-    pinMode(pinLedVermelho, OUTPUT);
-    pinMode(pinLedVerde, OUTPUT);
-    pinMode(A0, INPUT);
-    pinMode(pinoSensorLuz, INPUT);
-    pinMode(pinoBuzzer, OUTPUT); // saida do buzzer alertando entrada de intruso
-  
+
+  pinMode(pinLedVermelho, OUTPUT);
+  pinMode(pinLedVerde, OUTPUT);
+  pinMode(A0, INPUT);
+  pinMode(pinoSensorLuz, INPUT);
+  pinMode(pinoBuzzer, OUTPUT); // saida do buzzer alertando entrada de intruso
+
 }
 
 
 void loop() {
-  
-    int leitura = analogRead(pinoSensorLuz);
-    if (leitura > 40 && !alarmeAtivado) {
-      tocarSirene();
-      // enviarSMS caso o alarme esteja ativado;
-    } else {
-      noTone(pinoBuzzer);
+
+  int leitura = analogRead(pinoSensorLuz);
+  if (leitura > 40 && !alarmeAtivado) {
+    tocarSirene();
+    // enviarSMS caso o alarme esteja ativado;
+  } else {
+    noTone(pinoBuzzer);
+  }
+
+  //Serial.println(leitura);
+  delay(100);
+
+  char key = keypad.getKey();
+
+  if (key) {
+    if (digitandoSenha && key != '#') {
+      senhaDigitada += key;
+      Serial.println(senhaDigitada);
     }
+    if (key == '*') {
+      digitandoSenha = true;
+      senhaDigitada = "";
+      Serial.println("Iniciando digitação da senha...");
 
-    //Serial.println(leitura);
-    delay(100);
-
-    char key = keypad.getKey();
-
-    if (key) {
-      if (digitandoSenha && key != '#') {
-        senhaDigitada += key;
-        Serial.println(senhaDigitada);
-      }
-      if (key == '*') {
-        digitandoSenha = true;
+    }
+    if (key == '#') {
+      digitandoSenha = false;
+      Serial.println("Finalizou a  digitação da senha...");
+      Serial.println(senhaDigitada);
+      if (senhaDigitada == senha) {
+        alarmeAtivado = true;
+        digitalWrite(pinLedVerde, HIGH);
+        digitalWrite(pinLedVermelho, LOW);
+        Serial.println("Senha Correta, Alarme Desativado");
+        noTone(pinoBuzzer);
+        numeroSenhaTentativas = 0;
         senhaDigitada = "";
-        Serial.println("Iniciando digitação da senha...");
+        autorizado = true;
+        entradaSaida += 1;
+        manterHistorico()
+        if (entradaSaida % 2 == 0 && entradaSaida != 0) {
+          saida += 1;
+        } else {
+          entrada += 1;
+        }
 
-      }
-      if (key == '#') {
-        digitandoSenha = false;
-        Serial.println("Finalizou a  digitação da senha...");
-        Serial.println(senhaDigitada);
-        if (senhaDigitada == senha) {
-          alarmeAtivado = true;
-          digitalWrite(pinLedVerde, HIGH);
-          digitalWrite(pinLedVermelho, LOW);
-          Serial.println("Senha Correta, Alarme Desativado");
-          noTone(pinoBuzzer);
-          numeroSenhaTentativas = 0;
-          senhaDigitada = "";
         } else {
           numeroSenhaTentativas = numeroSenhaTentativas + 1;
           Serial.println("Senha Incorreta! Tente novamente!");
@@ -116,23 +131,41 @@ void loop() {
 
     if (numeroSenhaTentativas >= 3) {
       tocarSirene();
+      autorizado = false;
+      tentativa += 1;
+      manterHistorico()
     }
-  
-}
+
+  }
 
 
 
-void tocarSirene() {
-   for (int x = 0; x < 180; x++) {
-    //converte graus para radiando e depois obtém o valor do seno
-    seno = (sin(x * 3.1416 / 180));
-    //gera uma frequência a partir do valor do seno
-    frequencia = 2000 + (int(seno * 1000));
-    tone(pinoBuzzer, frequencia);
-    // delay(2);
+  void tocarSirene() {
+    for (int x = 0; x < 180; x++) {
+      //converte graus para radiando e depois obtém o valor do seno
+      seno = (sin(x * 3.1416 / 180));
+      //gera uma frequência a partir do valor do seno
+      frequencia = 2000 + (int(seno * 1000));
+      tone(pinoBuzzer, frequencia);
+      // delay(2);
     }
     // Serial.println(key);
-  
-}
 
+  }
 
+  void manterHistorico() {
+    if (autorizado) {
+        Serial.println("Número de entradas na casa: ");
+        Serial.println(entrada);
+        Serial.println("E número de saídas da casa: ");
+        Serial.println(saida);
+      } else {
+
+      }
+
+    } else {
+      Serial.println("Tentativas falhas e/ou tentativas de assalto: ");
+      Serial.println(tentativa);
+
+    }
+  }
