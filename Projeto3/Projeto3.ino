@@ -110,49 +110,49 @@ void loop() {
         noTone(pinoBuzzer);
         numeroSenhaTentativas = 0;
         senhaDigitada = "";
-        autorizado = true;
-        entradaSaida += 1;
-        manterHistorico()
-        if (entradaSaida % 2 == 0 && entradaSaida != 0) {
+        /*autorizado = true;
+          entradaSaida += 1;
+          manterHistorico();
+          if (entradaSaida % 2 == 0 && entradaSaida != 0) {
           saida += 1;
-        } else {
+          } else {
           entrada += 1;
-        }
+          }*/
 
-        } else {
-          numeroSenhaTentativas = numeroSenhaTentativas + 1;
-          Serial.println("Senha Incorreta! Tente novamente!");
-          digitalWrite(pinLedVermelho, HIGH);
-          digitalWrite(pinLedVerde, LOW);
-          senhaDigitada = "";
-        }
+      } else {
+        numeroSenhaTentativas = numeroSenhaTentativas + 1;
+        Serial.println("Senha Incorreta! Tente novamente!");
+        digitalWrite(pinLedVermelho, HIGH);
+        digitalWrite(pinLedVerde, LOW);
+        senhaDigitada = "";
       }
     }
-
-    if (numeroSenhaTentativas >= 3) {
-      tocarSirene();
-      autorizado = false;
-      tentativa += 1;
-      manterHistorico()
-    }
-
   }
 
-
-
-  void tocarSirene() {
-    for (int x = 0; x < 180; x++) {
-      //converte graus para radiando e depois obtém o valor do seno
-      seno = (sin(x * 3.1416 / 180));
-      //gera uma frequência a partir do valor do seno
-      frequencia = 2000 + (int(seno * 1000));
-      tone(pinoBuzzer, frequencia);
-      // delay(2);
-    }
-    // Serial.println(key);
-
+  if (numeroSenhaTentativas >= 3) {
+    tocarSirene();
+    //autorizado = false;
+    //tentativa += 1;
+    //manterHistorico();
   }
 
+}
+
+
+
+void tocarSirene() {
+  for (int x = 0; x < 180; x++) {
+    //converte graus para radiando e depois obtém o valor do seno
+    seno = (sin(x * 3.1416 / 180));
+    //gera uma frequência a partir do valor do seno
+    frequencia = 2000 + (int(seno * 1000));
+    tone(pinoBuzzer, frequencia);
+    // delay(2);
+  }
+  // Serial.println(key);
+
+}
+/*
   void manterHistorico() {
     if (autorizado) {
         Serial.println("Número de entradas na casa: ");
@@ -168,4 +168,4 @@ void loop() {
       Serial.println(tentativa);
 
     }
-  }
+  }*/
