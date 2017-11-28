@@ -40,11 +40,11 @@ const char* parametros = "sid=AC36135c57a2e51019e7c00f107e9408b0&token=db587f417
 
 String response = "";
 
-bool autorizado;
-int entradaSaida;
-int entrada;
-int saida;
-int tentativa;
+/*bool autorizado;
+  int entradaSaida;
+  int entrada;
+  int saida;
+  int tentativa;*/
 
 //Setup
 void setup() {
