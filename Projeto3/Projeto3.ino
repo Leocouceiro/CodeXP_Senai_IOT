@@ -91,45 +91,19 @@ void loop() {
   char key = keypad.getKey();
 
   if (key) {
-    /*if (digitandoSenha && key != '#') {
-      senhaDigitada += key;
-      Serial.println(senhaDigitada);
-      }*/
+    //if (digitandoSenha && key != '#') {
     if (digitandoSenha && strcmp(key, '#') == 0) {
       senhaDigitada += key;
       Serial.println(senhaDigitada);
-    }/*
-    if (key == '*') {
-      digitandoSenha = true;
-      senhaDigitada = "";
-      Serial.println("Iniciando digitação da senha...");
-    }*/
+    }
+    //if (key == '*') {
     if (strcmp(key, '*') == 0) {
       digitandoSenha = true;
       senhaDigitada = "";
       Serial.println("Iniciando digitação da senha...");
 
-    }/*
-    if (key == '#') {
-      digitandoSenha = false;
-      Serial.println("Finalizou a  digitação da senha...");
-      Serial.println(senhaDigitada);
-      if (senhaDigitada == senha) {
-        alarmeAtivado = true;
-        digitalWrite(pinLedVerde, HIGH);
-        digitalWrite(pinLedVermelho, LOW);
-        Serial.println("Senha Correta, Alarme Desativado");
-        noTone(pinoBuzzer);
-        numeroSenhaTentativas = 0;
-        senhaDigitada = "";
-        /*autorizado = true;
-          entradaSaida += 1;
-          manterHistorico();
-          if (entradaSaida % 2 == 0 && entradaSaida != 0) {
-          saida += 1;
-          } else {
-          entrada += 1;
-          }*/
+    }
+    //if (key == '#') {
     if (strcmp(key, '#') == 0) {
       digitandoSenha = false;
       Serial.println("Finalizou a  digitação da senha...");
