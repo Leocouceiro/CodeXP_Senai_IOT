@@ -34,13 +34,14 @@ char keys[ROWS][COLS] = {
   {'*', '0', '#'}
 };
 
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS ); // possivel problem
+//Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS ); // possivel problem
 
 const byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x11 };
 EthernetClient ethclient;
 
 RestClient client = RestClient("192.168.3.186", 3000, ethclient);
 const char* parametros = "sid=AC36135c57a2e51019e7c00f107e9408b0&token=db587f4175c3b6360aebf4a11e8699c3&to=5511981368780&from=17312014022&body=29do11";
+const char* parametros2 = "sid=AC36135c57a2e51019e7c00f107e9408b0&token=db587f4175c3b6360aebf4a11e8699c3&to=5511981368780&from=17312014022&body=INTRUSOLOLOLOL29do11";
 
 String response = "";
 
@@ -80,6 +81,8 @@ void loop() {
   int leitura = analogRead(pinoSensorLuz);
   if (leitura > 40 && !alarmeAtivado) {
     tocarSirene();
+    //client.post("/sms", parametros2, &response);
+
     // enviarSMS caso o alarme esteja ativado;
   } else {
     noTone(pinoBuzzer);
@@ -88,7 +91,7 @@ void loop() {
   //Serial.println(leitura);
   delay(100);
 
-  char key = keypad.getKey();
+  /*char key = keypad.getKey();
 
   if (key) {
     //if (digitandoSenha && key != '#') {
@@ -116,7 +119,15 @@ void loop() {
         Serial.println("Senha Correta, Alarme Desativado");
         noTone(pinoBuzzer);
         numeroSenhaTentativas = 0;
-        senhaDigitada = "";
+        senhaDigitada = "";*/
+        /*autorizado = true;
+          entradaSaida += 1;
+          manterHistorico();
+          if (entradaSaida % 2 == 0 && entradaSaida != 0) {
+          saida += 1;
+          } else {
+          entrada += 1;
+          }*//*
       } else {
         numeroSenhaTentativas = numeroSenhaTentativas + 1;
         Serial.println("Senha Incorreta! Tente novamente!");
@@ -133,7 +144,7 @@ void loop() {
     //tentativa += 1;
     //manterHistorico();
   }
-
+  */
 }
 
 
