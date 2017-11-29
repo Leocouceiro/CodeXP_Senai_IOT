@@ -1,7 +1,7 @@
 #include <RestClient.h>
 #include <UIPEthernet.h>
 #include <Keypad.h>
-//#include <utility/logging.h>
+#include <utility/logging.h>
 
 #define pinLedVermelho A0
 #define pinLedVerde A1
