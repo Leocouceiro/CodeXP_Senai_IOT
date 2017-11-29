@@ -1,20 +1,26 @@
 #include <RestClient.h>
 #include <UIPEthernet.h>
 #include <Keypad.h>
-#include <utility/logging.h>
+//#include <utility/logging.h>
 
-const int pinLedVermelho = A0;//Modifiquei o pinLedVermelho de 2 para A0
-const int pinLedVerde = A1;
-const int pinoSensorLuz = A2;
-const int pinoBuzzer = 9;
-
+#define pinLedVermelho A0
+#define pinLedVerde A1
+#define pinoSensorLuz A2
+#define pinoBuzzer A0
+/*
+  const int pinLedVermelho = A0;//Modifiquei o pinLedVermelho de 2 para A0
+  const int pinLedVerde = A1;
+  const int pinoSensorLuz = A2;
+  const int pinoBuzzer = 9;
+*/
 bool digitandoSenha = false;
 bool alarmeAtivado = false;
 float seno;
 int frequencia;
 
 int numeroSenhaTentativas = 0;
-String senhaDigitada = "000";
+//String senhaDigitada = "000";
+char* senhaDigitada = "000";
 const char* senha = "123";
 const byte ROWS = 4; //four rows
 const byte COLS = 3; //three columns
@@ -58,7 +64,7 @@ void setup() {
   Serial.print("Resposta do servidor: ");
   Serial.println(response);
   delay(1000);
-  // */
+  //
 
   pinMode(pinLedVermelho, OUTPUT);
   pinMode(pinLedVerde, OUTPUT);
@@ -85,16 +91,25 @@ void loop() {
   char key = keypad.getKey();
 
   if (key) {
-    if (digitandoSenha && key != '#') {
+    /*if (digitandoSenha && key != '#') {
       senhaDigitada += key;
       Serial.println(senhaDigitada);
-    }
+      }*/
+    if (digitandoSenha && strcmp(key, '#') == 0) {
+      senhaDigitada += key;
+      Serial.println(senhaDigitada);
+    }/*
     if (key == '*') {
       digitandoSenha = true;
       senhaDigitada = "";
       Serial.println("Iniciando digitação da senha...");
+    }*/
+    if (strcmp(key, '*') == 0) {
+      digitandoSenha = true;
+      senhaDigitada = "";
+      Serial.println("Iniciando digitação da senha...");
 
-    }
+    }/*
     if (key == '#') {
       digitandoSenha = false;
       Serial.println("Finalizou a  digitação da senha...");
@@ -114,8 +129,20 @@ void loop() {
           saida += 1;
           } else {
           entrada += 1;
-         }*/
-
+          }*/
+    if (strcmp(key, '#') == 0) {
+      digitandoSenha = false;
+      Serial.println("Finalizou a  digitação da senha...");
+      Serial.println(senhaDigitada);
+      //if (senhaDigitada == senha){
+      if (strcmp(senhaDigitada, senha) == 0) {
+        alarmeAtivado = true;
+        digitalWrite(pinLedVerde, HIGH);
+        digitalWrite(pinLedVermelho, LOW);
+        Serial.println("Senha Correta, Alarme Desativado");
+        noTone(pinoBuzzer);
+        numeroSenhaTentativas = 0;
+        senhaDigitada = "";
       } else {
         numeroSenhaTentativas = numeroSenhaTentativas + 1;
         Serial.println("Senha Incorreta! Tente novamente!");
