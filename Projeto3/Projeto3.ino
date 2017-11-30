@@ -1,6 +1,8 @@
+#include <Wire.h>
+
+
 #include <RestClient.h>
 #include <UIPEthernet.h>
-#include <Keypad.h>
 #include <utility/logging.h>
 
 const int pinLedVermelho = 2;
@@ -13,40 +15,20 @@ bool alarmeAtivado = false;
 float seno;
 int frequencia;
 
-int numeroSenhaTentativas = 0;
-String senhaDigitada = "000";
-const char* senha = "123";
-const byte ROWS = 4; //four rows
-const byte COLS = 3; //three columns
-
-
-byte rowPins[ROWS] = {5, 4, 3, A0}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {8, 7, 6}; //connect to the column pinouts of the keypad
-char keys[ROWS][COLS] = {
-  {'1', '2', '3'},
-  {'4', '5', '6'},
-  {'7', '8', '9'},
-  {'*', '0', '#'}
-};
-
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS ); // possivel problem
+// Keypad keypad1 = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS ); // possivel problem
 
 // Alterar o último valor para o id do seu kit
 const byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x11 };
 EthernetClient ethclient;
 
 RestClient client = RestClient("192.168.3.186", 3000, ethclient);
-const char* parametros = "sid=AC36135c57a2e51019e7c00f107e9408b0&token=db587f4175c3b6360aebf4a11e8699c3&to=5511981368780&from=17312014022&body=Rickyyy";
 
-String response = "";
 
-/*bool autorizado;
-  int entradaSaida;
-  int entrada;
-  int saida;
-  int tentativa;*/
-
+int LED = 5;
+int x = 0; // varial usada para receber do outro arduino
 //Setup
+
+
 void setup() {
   Serial.begin(9600);
   // Connect via DHCP
@@ -55,13 +37,6 @@ void setup() {
     Serial.print("IP recebido:"); Serial.println(Ethernet.localIP());
   }
 
-  int statusCode = client.post("/sms", parametros, &response);
-  Serial.print("Status da resposta: ");
-  Serial.println(statusCode);
-  Serial.print("Resposta do servidor: ");
-  Serial.println(response);
-  delay(1000);
-  // */
 
   pinMode(pinLedVermelho, OUTPUT);
   pinMode(pinLedVerde, OUTPUT);
@@ -69,72 +44,51 @@ void setup() {
   pinMode(pinoSensorLuz, INPUT);
   pinMode(pinoBuzzer, OUTPUT); // saida do buzzer alertando entrada de intruso
 
+
+  // Define the LED pin as Output
+  pinMode (LED, OUTPUT);
+  // Start the I2C Bus as Slave on address 9
+  Wire.begin(9);
+  // Attach a function to trigger when something is received.
+  Wire.onReceive(receiveEvent);
+}
+
+void receiveEvent(int bytes) {
+  if (x != 0) {
+    Serial.println("Recebi o valor de X");
+    Serial.println(x);
+  }
+
+  x = Wire.read();    // read one character from the I2C
+
+  //If value received is 0 blink LED for 200 ms
+  if (x == 1) {
+    digitalWrite(LED, HIGH);
+    enviarSMS();
+
+    x = 0;
+
+  }
+  //If value received is 3 blink LED for 400 ms
+  if (x == 3) {
+    digitalWrite(LED, LOW);
+
+  }
+}
+void enviarSMS() {
+  Serial.println("enviando SMS");
+  return;
+  const char* parametros = "sid=AC36135c57a2e51019e7c00f107e9408b0&token=db587f4175c3b6360aebf4a11e8699c3&to=5511981368780&from=17312014022&body=Rickyyy";
+  String response = "";
+  int statusCode = client.post("/sms", parametros, &response);
+  Serial.print("Status da resposta: ");
+  Serial.println(statusCode);
+  Serial.print("Resposta do servidor: ");
+  Serial.println(response);
 }
 
 
 void loop() {
-
-  int leitura = analogRead(pinoSensorLuz);
-  if (leitura > 40 && !alarmeAtivado) {
-    tocarSirene();
-    // enviarSMS caso o alarme esteja ativado;
-  } else {
-    noTone(pinoBuzzer);
-  }
-
-  //Serial.println(leitura);
-  delay(100);
-
-  char key = keypad.getKey();
-
-  if (key) {
-    if (digitandoSenha && key != '#') {
-      senhaDigitada += key;
-      Serial.println(senhaDigitada);
-    }
-    if (key == '*') {
-      digitandoSenha = true;
-      senhaDigitada = "";
-      Serial.println("Iniciando digitação da senha...");
-
-    }
-    if (key == '#') {
-      digitandoSenha = false;
-      Serial.println("Finalizou a  digitação da senha...");
-      Serial.println(senhaDigitada);
-      if (senhaDigitada == senha) {
-        alarmeAtivado = true;
-        digitalWrite(pinLedVerde, HIGH);
-        digitalWrite(pinLedVermelho, LOW);
-        Serial.println("Senha Correta, Alarme Desativado");
-        noTone(pinoBuzzer);
-        numeroSenhaTentativas = 0;
-        senhaDigitada = "";
-        /*autorizado = true;
-          entradaSaida += 1;
-          manterHistorico();
-          if (entradaSaida % 2 == 0 && entradaSaida != 0) {
-          saida += 1;
-          } else {
-          entrada += 1;
-          }*/
-
-      } else {
-        numeroSenhaTentativas = numeroSenhaTentativas + 1;
-        Serial.println("Senha Incorreta! Tente novamente!");
-        digitalWrite(pinLedVermelho, HIGH);
-        digitalWrite(pinLedVerde, LOW);
-        senhaDigitada = "";
-      }
-    }
-  }
-
-  if (numeroSenhaTentativas >= 3) {
-    tocarSirene();
-    //autorizado = false;
-    //tentativa += 1;
-    //manterHistorico();
-  }
 
 }
 
